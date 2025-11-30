@@ -1,3 +1,4 @@
+import PasswordInput from '@/components/password-input'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -14,7 +15,7 @@ const SignupPage = () => {
   return (
     <div className="flex h-screen w-screen flex-col items-center justify-center gap-3">
       <Card className="w-[500px]">
-        <CardHeader className="items-center justify-center">
+        <CardHeader>
           <CardTitle>Crie a sua conta</CardTitle>
           <CardDescription>Insira os seus dados abaixo</CardDescription>
         </CardHeader>
@@ -22,7 +23,8 @@ const SignupPage = () => {
           <Input placeholder="Digite o seu nome" />
           <Input placeholder="Digite o seu sobrenome" />
           <Input placeholder="Digite o seu email" />
-          <Input type="password" placeholder="Digite o seu senha" />
+          <PasswordInput placeholder="Digite a senha" />
+          <PasswordInput placeholder="Digite a senha novamente" />
         </CardContent>
         <CardFooter>
           <Button className="w-full">Criar conta</Button>
