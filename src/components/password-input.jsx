@@ -15,9 +15,11 @@ const PasswordInput = forwardRef(
           placeholder={placeholder}
         />
         <Button
+          type="button"
           variant="ghost"
-          className="buttom-0 absolute right-0 top-0 my-auto mr-1 h-8 w-8 text-muted-foreground"
+          className="absolute bottom-0 right-0 top-0 my-auto mr-1 h-8 w-8 text-muted-foreground"
           onClick={() => setPasswordIsVisible((prev) => !prev)}
+          aria-label={passwordIsVisible ? 'Esconder senha' : 'Mostrar senha'}
         >
           {passwordIsVisible ? <EyeOffIcon /> : <EyeIcon />}
         </Button>
