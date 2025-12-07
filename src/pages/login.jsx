@@ -22,6 +22,10 @@ import { Link } from 'react-router'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import PasswordInput from '@/components/password-input'
+import { useMutation } from '@tanstack/react-query'
+import { useContext, useEffect, useState } from 'react'
+import { api } from '@/lib/axios'
+import { AuthContext } from '@/context/auth'
 
 const loginSchema = z.object({
   email: z
@@ -39,6 +43,8 @@ const loginSchema = z.object({
 })
 
 const LoginPage = () => {
+  const { user } = useContext(AuthContext)
+
   const methods = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -46,12 +52,50 @@ const LoginPage = () => {
       password: '',
     },
   })
+
+  useEffect(() => {
+    const init = async () => {
+      const accessToken = localStorage.getItem('accessToken')
+      const refreshToken = localStorage.getItem('refreshToken')
+      try {
+        if (!accessToken && !refreshToken) return
+        const response = await api.get('/users/me', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        })
+        setUser(response.data)
+      } catch (error) {
+        localStorage.removeItem('accessToken')
+        console.error(error)
+      }
+    }
+    init()
+  }, [])
+
   const handleSubmit = (data) => {
-    console.log(data)
+    loginMutation.mutate(data, {
+      onSuccess: (loginUser) => {
+        const accessToken = loginUser.tokens.accessToken
+        const refreshToken = loginUser.tokens.refreshToken
+        localStorage.setItem('accessToken', accessToken)
+        localStorage.setItem('refreshToken', refreshToken)
+        setUser(loginUser)
+        toast.success('Login realizado com sucesso!')
+      },
+      onError: () => {
+        toast.error(error)
+      },
+    })
   }
+
+  // if (user) {
+  //   return <h1>Seja bem-vindo {user.first_name}</h1>
+  // }
 
   return (
     <div className="flex h-screen w-screen flex-col items-center justify-center gap-3">
+      <h1>{userTest}</h1>
       <Form {...methods}>
         <form onSubmit={methods.handleSubmit(handleSubmit)}>
           <Card className="w-[500px]">
