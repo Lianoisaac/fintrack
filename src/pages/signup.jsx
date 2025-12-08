@@ -22,10 +22,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { toast } from 'sonner'
-import { api } from '@/lib/axios'
-import { useContext, useEffect } from 'react'
-import { AuthContext } from '@/context/auth'
+import { useAuthContext } from '@/context/auth'
 
 const signupSchema = z
   .object({
@@ -60,7 +57,7 @@ const signupSchema = z
   })
 
 const SignupPage = () => {
-  const { user, signup } = useContext(AuthContext)
+  const { user, signup, isInitializing } = useAuthContext()
 
   const methods = useForm({
     resolver: zodResolver(signupSchema),
@@ -76,8 +73,10 @@ const SignupPage = () => {
 
   const handleSubmit = (data) => signup(data)
 
+  if (isInitializing) return null
+
   if (user) {
-    return <h1>Seja bem-vindo {user.first_name}</h1>
+    return <Navigate to="/" />
   }
   return (
     <div className="flex h-screen w-screen flex-col items-center justify-center gap-3">

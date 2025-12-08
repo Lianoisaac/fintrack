@@ -16,16 +16,12 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from 'react-router'
+import { Link, Navigate } from 'react-router'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import PasswordInput from '@/components/password-input'
-import { useMutation } from '@tanstack/react-query'
-import { useContext, useEffect, useState } from 'react'
-import { api } from '@/lib/axios'
-import { AuthContext } from '@/context/auth'
+import { useAuthContext } from '@/context/auth'
 
 const loginSchema = z.object({
   email: z
@@ -43,7 +39,7 @@ const loginSchema = z.object({
 })
 
 const LoginPage = () => {
-  const { user } = useContext(AuthContext)
+  const { user, login, isInitializing } = useAuthContext()
 
   const methods = useForm({
     resolver: zodResolver(loginSchema),
@@ -53,49 +49,16 @@ const LoginPage = () => {
     },
   })
 
-  useEffect(() => {
-    const init = async () => {
-      const accessToken = localStorage.getItem('accessToken')
-      const refreshToken = localStorage.getItem('refreshToken')
-      try {
-        if (!accessToken && !refreshToken) return
-        const response = await api.get('/users/me', {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        })
-        setUser(response.data)
-      } catch (error) {
-        localStorage.removeItem('accessToken')
-        console.error(error)
-      }
-    }
-    init()
-  }, [])
+  const handleSubmit = (data) => login(data)
 
-  const handleSubmit = (data) => {
-    loginMutation.mutate(data, {
-      onSuccess: (loginUser) => {
-        const accessToken = loginUser.tokens.accessToken
-        const refreshToken = loginUser.tokens.refreshToken
-        localStorage.setItem('accessToken', accessToken)
-        localStorage.setItem('refreshToken', refreshToken)
-        setUser(loginUser)
-        toast.success('Login realizado com sucesso!')
-      },
-      onError: () => {
-        toast.error(error)
-      },
-    })
+  if (isInitializing) return null
+  if (user) {
+    return <Navigate to="/" />
   }
-
-  // if (user) {
-  //   return <h1>Seja bem-vindo {user.first_name}</h1>
-  // }
 
   return (
     <div className="flex h-screen w-screen flex-col items-center justify-center gap-3">
-      <h1>{userTest}</h1>
+      {/* <h1>{user}</h1> */}
       <Form {...methods}>
         <form onSubmit={methods.handleSubmit(handleSubmit)}>
           <Card className="w-[500px]">
