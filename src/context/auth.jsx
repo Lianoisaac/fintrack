@@ -8,6 +8,7 @@ export const AuthContext = createContext({
   isInitializing: true,
   login: () => {},
   signup: () => {},
+  signOut: () => {},
 })
 
 export const useAuthContext = () => useContext(AuthContext)
@@ -18,6 +19,11 @@ const LOCAL_STORAGE_REFRESH_TOKEN_KEY = 'refreshToken'
 const setTokens = (tokens) => {
   localStorage.setItem(LOCAL_STORAGE_TOKEN_KEY, tokens.accessToken)
   localStorage.setItem(LOCAL_STORAGE_REFRESH_TOKEN_KEY, tokens.refreshToken)
+}
+
+const removeTokens = () => {
+  localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY)
+  localStorage.removeItem(LOCAL_STORAGE_REFRESH_TOKEN_KEY)
 }
 
 export const AuthContextProvider = ({ children }) => {
@@ -91,8 +97,8 @@ export const AuthContextProvider = ({ children }) => {
         })
         setUser(response.data)
       } catch (error) {
-        localStorage.removeItem(LOCAL_STORAGE_TOKEN_KEY)
-        localStorage.removeItem(LOCAL_STORAGE_REFRESH_TOKEN_KEY)
+        setUser(null)
+        removeTokens()
         console.error(error)
       } finally {
         setIsInitializing(false)
@@ -101,6 +107,10 @@ export const AuthContextProvider = ({ children }) => {
     init()
   }, [])
 
+  const signOut = () => {
+    setUser(null)
+    removeTokens()
+  }
   return (
     <AuthContext.Provider
       value={{
@@ -108,6 +118,7 @@ export const AuthContextProvider = ({ children }) => {
         login,
         signup,
         isInitializing,
+        signOut,
       }}
     >
       {children}
