@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import Header from '@/components/Header'
 import { useAuthContext } from '@/context/auth'
 import { Navigate } from 'react-router'
 
@@ -9,12 +9,7 @@ const HomePage = () => {
   if (!user) {
     return <Navigate to="/login" />
   }
-  return (
-    <div>
-      <h1>Home Page - {user.first_name}</h1>
-      <Button onClick={signOut}>Sair</Button>
-    </div>
-  )
+  return <Header />
 }
 
 export default HomePage

@@ -9,7 +9,7 @@ export const UserService = {
       password: input.password,
     })
     return {
-      //Convertendo para camelCase - Frontend: first_name - Backend: firstName
+      //Convertendo para camelCase - Frontend: firstName - Backend: first_name
       id: response.data.id,
       firstName: response.data.first_name,
       lastName: response.data.last_name,
