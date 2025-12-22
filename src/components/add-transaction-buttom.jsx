@@ -1,4 +1,5 @@
 import {
+  Loader2Icon,
   PiggyBankIcon,
   PlusIcon,
   TrendingDownIcon,
@@ -30,6 +31,11 @@ import {
 
 import { NumericFormat } from 'react-number-format'
 import { DatePicker } from './ui/date-picker'
+import { TransactionService } from '@/services/transaction'
+import { toast } from 'sonner'
+import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useAuthContext } from '@/context/auth'
 
 const formSchema = z.object({
   name: z.string().trim().min(1, {
@@ -45,6 +51,21 @@ const formSchema = z.object({
 })
 
 const AddTransactionButtom = () => {
+  const [dialogIsOpen, setDialogIsOpen] = useState(false)
+
+  const { user } = useAuthContext()
+  const queryClient = useQueryClient()
+
+  const { mutateAsync: createTransaction, isPending } = useMutation({
+    mutationKey: ['createTransaction'],
+    mutationFn: (input) => TransactionService.create(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['balance', user.id],
+      })
+    },
+  })
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -56,13 +77,20 @@ const AddTransactionButtom = () => {
     shouldUnregister: true,
   })
 
-  const onSubmit = (data) => {
-    console.log({ data })
+  const onSubmit = async (data) => {
+    try {
+      await createTransaction(data)
+      // await TransactionService.create(data)
+      setDialogIsOpen(false)
+      toast.success('Transação criada com sucesso')
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   return (
     <>
-      <Dialog>
+      <Dialog open={dialogIsOpen} onOpenChange={setDialogIsOpen}>
         <DialogTrigger asChild>
           <Button>
             <PlusIcon /> Nova transação
@@ -180,11 +208,16 @@ const AddTransactionButtom = () => {
               />
               <DialogFooter>
                 <DialogClose asChild>
-                  <Button variant="outline" className="w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    disabled={isPending}
+                  >
                     Cancel
                   </Button>
                 </DialogClose>
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full" disabled={isPending}>
+                  {isPending && <Loader2Icon className="animate-spin" />}
                   Salvar
                 </Button>
               </DialogFooter>
